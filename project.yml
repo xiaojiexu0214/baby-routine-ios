@@ -1,0 +1,25 @@
+name: BabyRoutine
+options:
+  minimumXcodeGenVersion: 2.38.0
+settings:
+  base:
+    SWIFT_VERSION: 5.9
+targets:
+  BabyRoutine:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: BabyRoutine
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.xiaojiexu.babyroutine
+        INFOPLIST_FILE: BabyRoutine/Resources/Info.plist
+    info:
+      path: BabyRoutine/Resources/Info.plist
+      properties:
+        CFBundleDisplayName: BabyRoutine
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    prebuildScripts: []
