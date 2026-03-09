@@ -6,7 +6,7 @@ struct HistoryView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(store.last7DaysSummary(), id: \ .0) { date, stats in
+                ForEach(store.last7DaysSummary(), id: \.0) { date, stats in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(date, style: .date).font(.headline)
                         Text("奶量 \(stats.totalFeedML)ml · 睡眠 \(fmt(stats.totalSleep)) · 清醒 \(fmt(stats.totalAwake))")

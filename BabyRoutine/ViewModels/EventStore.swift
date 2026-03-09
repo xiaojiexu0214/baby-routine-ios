@@ -21,12 +21,12 @@ final class EventStore: ObservableObject {
         let soothe = dayEvents.filter { $0.type == .soothe }
 
         return DailyStats(
-            totalFeedML: feed.compactMap(\ .amountML).reduce(0, +),
-            totalSleep: sleep.map(\ .duration).reduce(0, +),
-            totalAwake: awake.map(\ .duration).reduce(0, +),
+            totalFeedML: feed.compactMap(\.amountML).reduce(0, +),
+            totalSleep: sleep.map(\.duration).reduce(0, +),
+            totalAwake: awake.map(\.duration).reduce(0, +),
             feedCount: feed.count,
             sleepCount: sleep.count,
-            avgSootheDuration: soothe.isEmpty ? 0 : soothe.map(\ .duration).reduce(0, +) / Double(soothe.count)
+            avgSootheDuration: soothe.isEmpty ? 0 : soothe.map(\.duration).reduce(0, +) / Double(soothe.count)
         )
     }
 
