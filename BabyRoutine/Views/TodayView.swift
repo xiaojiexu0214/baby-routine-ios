@@ -2,33 +2,51 @@ import SwiftUI
 
 struct TodayView: View {
     @EnvironmentObject var store: EventStore
+    @State private var showQuickAdd = false
+    @State private var quickType: EventType = .feed
 
     var body: some View {
         NavigationStack {
             let stats = store.dailyStats(for: Date())
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("24 小时时间线")
-                        .font(.headline)
+            VStack(spacing: 12) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("今日时间线")
+                            .font(.title3.bold())
 
-                    DayTimelineView(events: store.events(on: Date()))
-                        .frame(height: 560)
+                        DayTimelineView(events: store.events(on: Date()))
+                            .frame(height: 560)
 
-                    GroupBox("今日统计") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("总奶量：\(stats.totalFeedML) ml")
-                            Text("总睡眠：\(format(stats.totalSleep))")
-                            Text("总清醒：\(format(stats.totalAwake))")
-                            Text("吃奶次数：\(stats.feedCount)")
-                            Text("睡眠次数：\(stats.sleepCount)")
-                            Text("平均哄睡：\(format(stats.avgSootheDuration))")
+                        GroupBox("今日统计") {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("总奶量：\(stats.totalFeedML) ml")
+                                Text("总睡眠：\(format(stats.totalSleep))")
+                                Text("总清醒：\(format(stats.totalAwake))")
+                                Text("吃奶次数：\(stats.feedCount)")
+                                Text("睡眠次数：\(stats.sleepCount)")
+                                Text("平均哄睡：\(format(stats.avgSootheDuration))")
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .groupBoxStyle(CartoonGroupBox())
                     }
+                    .padding(.horizontal)
+                    .padding(.top, 8)
                 }
-                .padding()
+
+                QuickRecordBar { type in
+                    quickType = type
+                    showQuickAdd = true
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
             }
             .navigationTitle("Today")
+            .background(Color(red: 0.97, green: 0.98, blue: 1.0).ignoresSafeArea())
+            .sheet(isPresented: $showQuickAdd) {
+                QuickAddEventSheet(defaultType: quickType)
+                    .environmentObject(store)
+            }
         }
     }
 
@@ -43,19 +61,25 @@ private struct DayTimelineView: View {
     let events: [BabyEvent]
 
     private let hourHeight: CGFloat = 56
-    private let hourLabelWidth: CGFloat = 34
+    private let hourLabelWidth: CGFloat = 36
 
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.vertical) {
-                HStack(alignment: .top, spacing: 8) {
+                HStack(alignment: .top, spacing: 10) {
                     hourLabels
                     timelineCanvas
                 }
-                .padding(8)
+                .padding(10)
             }
-            .background(Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.black.opacity(0.14), lineWidth: 2)
+                    )
+            )
             .onAppear {
                 let h = Calendar.current.component(.hour, from: Date())
                 proxy.scrollTo("hour_\(h)", anchor: .center)
@@ -67,9 +91,9 @@ private struct DayTimelineView: View {
         VStack(spacing: 0) {
             ForEach(0..<24, id: \.self) { h in
                 Text(String(format: "%02d", h))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .frame(width: hourLabelWidth, height: hourHeight, alignment: .top)
+                    .font(h % 3 == 0 ? .caption.bold() : .caption2)
+                    .foregroundStyle(h % 3 == 0 ? .primary : .secondary)
+                    .frame(width: hourLabelWidth, height: hourHeight, alignment: .topTrailing)
                     .id("hour_\(h)")
             }
         }
@@ -79,22 +103,28 @@ private struct DayTimelineView: View {
         GeometryReader { geo in
             ZStack(alignment: .topLeading) {
                 VStack(spacing: 0) {
-                    ForEach(0..<24, id: \.self) { _ in
+                    ForEach(0..<24, id: \.self) { h in
                         Rectangle()
-                            .stroke(Color.white.opacity(0.3), lineWidth: 0.5)
-                            .frame(height: hourHeight)
+                            .fill(h % 3 == 0 ? Color.black.opacity(0.15) : Color.black.opacity(0.08))
+                            .frame(height: h % 3 == 0 ? 1.2 : 0.7)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, hourHeight - (h % 3 == 0 ? 1.2 : 0.7))
                     }
                 }
 
                 ForEach(layoutEvents(width: geo.size.width)) { item in
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: 10)
                         .fill(item.color)
-                        .frame(width: item.width, height: max(12, item.height))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.black.opacity(0.18), lineWidth: 1.6)
+                        )
+                        .frame(width: item.width, height: max(14, item.height))
                         .overlay(alignment: .leading) {
                             Text(item.title)
-                                .font(.caption2)
+                                .font(.caption2.bold())
                                 .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
+                                .padding(.horizontal, 7)
                         }
                         .offset(x: item.x, y: item.y)
                 }
@@ -120,9 +150,9 @@ private struct DayTimelineView: View {
 
             return TimelineItem(
                 id: e.id,
-                x: 4,
+                x: 6,
                 y: y,
-                width: max(40, width - 8),
+                width: max(60, width - 12),
                 height: h,
                 color: color(e.type),
                 title: label(for: e)
@@ -146,11 +176,117 @@ private struct DayTimelineView: View {
 
     private func color(_ t: EventType) -> Color {
         switch t {
-        case .sleep: return Color(red: 0.08, green: 0.24, blue: 0.58) // 深蓝
-        case .awake: return Color(red: 0.44, green: 0.80, blue: 0.52) // 浅绿
-        case .feed: return Color.orange
-        case .soothe: return Color.purple
+        case .sleep: return Color(red: 0.12, green: 0.29, blue: 0.70)
+        case .awake: return Color(red: 0.43, green: 0.78, blue: 0.55)
+        case .feed: return Color(red: 0.95, green: 0.58, blue: 0.20)
+        case .soothe: return Color(red: 0.58, green: 0.36, blue: 0.88)
         }
+    }
+}
+
+private struct QuickRecordBar: View {
+    let onTap: (EventType) -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            quickButton(.feed, icon: "drop.fill", color: .orange)
+            quickButton(.sleep, icon: "moon.zzz.fill", color: .blue)
+            quickButton(.awake, icon: "sun.max.fill", color: .green)
+            quickButton(.soothe, icon: "figure.and.child.holdinghands", color: .purple)
+        }
+        .padding(10)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(Color.black.opacity(0.14), lineWidth: 2)
+                )
+        )
+    }
+
+    private func quickButton(_ type: EventType, icon: String, color: Color) -> some View {
+        Button {
+            onTap(type)
+        } label: {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(.white)
+                    .frame(width: 42, height: 42)
+                    .background(Circle().fill(color))
+                Text(type.title)
+                    .font(.caption2.bold())
+                    .foregroundStyle(.primary)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct QuickAddEventSheet: View {
+    @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var store: EventStore
+
+    @State var type: EventType
+    @State var startAt = Date()
+    @State var endAt = Date().addingTimeInterval(30 * 60)
+    @State var amountML = ""
+    @State var note = ""
+
+    init(defaultType: EventType) {
+        _type = State(initialValue: defaultType)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Picker("类型", selection: $type) {
+                    ForEach(EventType.allCases) { t in
+                        Text(t.title).tag(t)
+                    }
+                }
+                DatePicker("开始", selection: $startAt)
+                DatePicker("结束", selection: $endAt)
+                if type == .feed {
+                    TextField("奶量(ml)", text: $amountML)
+                        .keyboardType(.numberPad)
+                }
+                TextField("备注", text: $note)
+            }
+            .navigationTitle("快速记录")
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("取消") { dismiss() }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("保存") {
+                        let event = BabyEvent(type: type, startAt: startAt, endAt: endAt, amountML: Int(amountML), note: note.isEmpty ? nil : note)
+                        store.add(event)
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+private struct CartoonGroupBox: GroupBoxStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            configuration.label.font(.headline)
+            configuration.content
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color.white)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.black.opacity(0.14), lineWidth: 2)
+                )
+        )
     }
 }
 
