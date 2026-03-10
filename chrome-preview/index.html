@@ -9,14 +9,11 @@
 <body>
   <div class="phone">
     <header class="topbar">
-      <h1 id="title">今天</h1>
-      <button id="mockBtn" class="ghost">+ 模拟记录</button>
+      <h1 id="title">2026年3月10日 周二 · 出生第96天</h1>
     </header>
 
     <main>
       <section id="tab-today" class="tab active">
-        <h2>今日时间线（玩耍自动补齐）</h2>
-
         <section id="statsBar" class="card stats-bar"></section>
 
         <div class="today-layout">
@@ -26,10 +23,11 @@
         </div>
 
         <section class="quick">
-          <button data-type="feed">记录吃奶</button>
-          <button data-type="sleep">记录睡眠</button>
-          <button data-type="awake">记录玩耍</button>
-          <button data-type="diaper">换尿片</button>
+          <button data-type="feed"><span>🍼</span><em>吃奶</em></button>
+          <button data-type="sleep"><span>💤</span><em>开始睡觉</em></button>
+          <button data-type="awake"><span>🥳</span><em>起床玩耍</em></button>
+          <button data-type="urine"><span>💧</span><em>尿尿</em></button>
+          <button data-type="poop"><span>💩</span><em>臭臭</em></button>
         </section>
       </section>
 
@@ -78,13 +76,27 @@
     </main>
 
     <nav class="tabs">
-      <button data-tab="today" class="active">今天</button>
-      <button data-tab="add">记录</button>
-      <button data-tab="history">历史</button>
+      <button data-tab="today" class="active">记录</button>
+      <button data-tab="add">编辑</button>
+      <button data-tab="history">摘要</button>
       <button data-tab="soothe">哄睡</button>
       <button data-tab="settings">设置</button>
     </nav>
   </div>
+
+  <dialog id="quickDialog" class="quick-dialog">
+    <form method="dialog" id="quickForm" class="form">
+      <h3 id="quickTitle">记录</h3>
+      <input id="quickType" type="hidden" />
+      <label>时间 <input id="quickAt" type="datetime-local" required /></label>
+      <label id="quickDurationWrap">时长(分钟) <input id="quickDuration" type="number" min="1" value="20" /></label>
+      <label id="quickAmountWrap">奶量(ml) <input id="quickAmount" type="number" min="0" value="120" /></label>
+      <menu>
+        <button value="cancel">取消</button>
+        <button value="default" class="primary">保存</button>
+      </menu>
+    </form>
+  </dialog>
 
   <script src="./app.js"></script>
 </body>
