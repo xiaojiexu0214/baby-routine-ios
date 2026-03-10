@@ -1,9 +1,9 @@
 const colors = {
-  // 莫兰迪 + 透明度（可叠加看层次）
-  feed: 'rgba(196, 146, 118, 0.62)',
-  sleep: 'rgba(106, 124, 147, 0.64)',
-  awake: 'rgba(76, 108, 98, 0.78)',
-  soothe: 'rgba(146, 128, 156, 0.62)'
+  // 来自你给的色卡：底色 + 边框（边框更深一阶）
+  feed:  { bg: 'rgba(238, 211, 183, 0.68)', border: '#AB7543', text: '#5A4232' },
+  sleep: { bg: 'rgba(168, 199, 214, 0.68)', border: '#4B7A90', text: '#1F3945' },
+  awake: { bg: 'rgba(189, 210, 153, 0.74)', border: '#5E7F19', text: '#2E4410' },
+  soothe:{ bg: 'rgba(212, 168, 214, 0.68)', border: '#8F4B90', text: '#4C2A4C' }
 };
 const titles = { feed: '吃奶', sleep: '睡眠', awake: '清醒', soothe: '哄睡' };
 
@@ -97,8 +97,11 @@ function renderTimeline(){
     div.style.left = `${left}px`;
     div.style.width = `${width}px`;
     div.style.height = `${height}px`;
+    const tone = colors[e.type] || { bg: 'rgba(200,200,200,.65)', border: '#999', text: '#222' };
     div.style.zIndex = String((zBase[e.type] || 1) * 100 + i);
-    div.style.background = colors[e.type];
+    div.style.background = tone.bg;
+    div.style.borderColor = tone.border;
+    div.style.color = tone.text;
     div.textContent = `${fmtTime(e.start)}-${fmtTime(e.end)}  ${titles[e.type]}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
     root.appendChild(div);
   });
