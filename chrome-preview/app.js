@@ -66,10 +66,16 @@ function fmtTime(dateStr){
 function renderTimeline(){
   const root = document.getElementById('timeline');
   root.innerHTML = '';
-
   root.style.height = `${DAY_HEIGHT}px`;
 
-  // 小时刻度
+  const lanes = ['feed', 'sleep', 'awake', 'soothe'];
+  const laneTitles = { feed: '吃奶', sleep: '睡眠', awake: '清醒', soothe: '哄睡' };
+  const timeAxisWidth = 54;
+  const laneGap = 6;
+  const lanePad = 8;
+  const usableWidth = root.clientWidth - timeAxisWidth - 10;
+  const laneWidth = (usableWidth - laneGap * (lanes.length - 1)) / lanes.length;
+
   for(let h = 0; h < 24; h++){
     const mark = document.createElement('div');
     mark.className = 'hour-mark';
@@ -78,18 +84,34 @@ function renderTimeline(){
     root.appendChild(mark);
   }
 
-  const zBase = { awake: 1, sleep: 2, soothe: 3, feed: 4 };
-  const typeOffset = { awake: 0, sleep: 8, soothe: 16, feed: 24 };
+  lanes.forEach((type, idx) => {
+    const left = timeAxisWidth + idx * (laneWidth + laneGap);
+
+    const laneBg = document.createElement('div');
+    laneBg.className = 'lane-bg';
+    laneBg.style.left = `${left}px`;
+    laneBg.style.width = `${laneWidth}px`;
+    laneBg.style.height = `${DAY_HEIGHT}px`;
+    root.appendChild(laneBg);
+
+    const laneHeader = document.createElement('div');
+    laneHeader.className = 'lane-header';
+    laneHeader.style.left = `${left}px`;
+    laneHeader.style.width = `${laneWidth}px`;
+    laneHeader.textContent = laneTitles[type];
+    root.appendChild(laneHeader);
+  });
 
   const items = events
     .map(e => ({ ...e, startMin: mins(e.start), endMin: Math.max(mins(e.end), mins(e.start) + 5) }))
     .sort((a,b) => a.startMin - b.startMin || a.endMin - b.endMin);
 
   items.forEach((e, i) => {
+    const laneIndex = Math.max(0, lanes.indexOf(e.type));
     const top = e.startMin / (24*60) * DAY_HEIGHT;
     const height = Math.max(20, (e.endMin - e.startMin)/(24*60)*DAY_HEIGHT);
-    const left = 54 + typeOffset[e.type];
-    const width = Math.max(120, root.clientWidth - left - 10);
+    const left = timeAxisWidth + laneIndex * (laneWidth + laneGap) + lanePad/2;
+    const width = laneWidth - lanePad;
 
     const div = document.createElement('div');
     div.className = 'event';
@@ -98,11 +120,11 @@ function renderTimeline(){
     div.style.width = `${width}px`;
     div.style.height = `${height}px`;
     const tone = colors[e.type] || { bg: 'rgba(200,200,200,.65)', border: '#999', text: '#222' };
-    div.style.zIndex = String((zBase[e.type] || 1) * 100 + i);
+    div.style.zIndex = String(120 + i);
     div.style.background = tone.bg;
     div.style.borderColor = tone.border;
     div.style.color = tone.text;
-    div.textContent = `${fmtTime(e.start)}-${fmtTime(e.end)}  ${titles[e.type]}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
+    div.textContent = `${fmtTime(e.start)}-${fmtTime(e.end)}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
     root.appendChild(div);
   });
 }
