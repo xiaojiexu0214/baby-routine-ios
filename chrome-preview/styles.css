@@ -58,14 +58,15 @@ h2 { margin: 6px 0 10px; font-size: 18px; }
 }
 .event {
   position: absolute;
-  left: 8px;
-  right: 8px;
   border-radius: 10px;
   color: #fff;
   font-size: 12px;
   font-weight: 700;
   padding: 4px 8px;
   border: 1px solid rgba(255,255,255,.35);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .quick {
   margin-top: 10px;

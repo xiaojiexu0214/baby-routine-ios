@@ -54,16 +54,44 @@ function calcStats(){
   return { feedML, sleep, awake, feedCount, sleepCount, avgSoothe: events.filter(e=>e.type==='soothe').length ? Math.round(soothe/events.filter(e=>e.type==='soothe').length) : 0 };
 }
 
+function layoutWithLanes(source){
+  const items = source
+    .map(e => ({ ...e, startMin: mins(e.start), endMin: Math.max(mins(e.end), mins(e.start) + 5) }))
+    .sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
+
+  const laneEnd = [];
+  return items.map(item => {
+    let lane = laneEnd.findIndex(end => item.startMin >= end);
+    if (lane === -1) {
+      lane = laneEnd.length;
+      laneEnd.push(item.endMin);
+    } else {
+      laneEnd[lane] = item.endMin;
+    }
+    return { ...item, lane };
+  }).map(i => ({ ...i, laneCount: laneEnd.length }));
+}
+
 function renderTimeline(){
   const root = document.getElementById('timeline');
   root.innerHTML = '';
-  events.forEach(e => {
-    const start = mins(e.start), end = mins(e.end);
-    const top = start / (24*60) * 520;
-    const height = Math.max(14, (end-start)/(24*60)*520);
+
+  const laidOut = layoutWithLanes(events);
+  const maxLanes = Math.max(1, ...laidOut.map(e => e.lane + 1));
+  const sidePad = 8;
+  const gap = 6;
+  const laneWidth = Math.max(70, (root.clientWidth - sidePad * 2 - gap * (maxLanes - 1)) / maxLanes);
+
+  laidOut.forEach(e => {
+    const top = e.startMin / (24*60) * 520;
+    const height = Math.max(16, (e.endMin - e.startMin)/(24*60)*520);
+    const left = sidePad + e.lane * (laneWidth + gap);
+
     const div = document.createElement('div');
     div.className = 'event';
     div.style.top = `${top}px`;
+    div.style.left = `${left}px`;
+    div.style.width = `${laneWidth}px`;
     div.style.height = `${height}px`;
     div.style.background = colors[e.type];
     div.textContent = `${titles[e.type]}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
@@ -135,5 +163,6 @@ document.getElementById('mockBtn').onclick = () => {
 
 document.getElementById('feedLead').oninput = e => document.getElementById('feedLeadText').textContent = e.target.value;
 document.getElementById('awakeLead').oninput = e => document.getElementById('awakeLeadText').textContent = e.target.value;
+window.addEventListener('resize', renderTimeline);
 
 rerender();
