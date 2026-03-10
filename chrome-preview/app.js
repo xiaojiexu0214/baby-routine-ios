@@ -1,0 +1,139 @@
+const colors = {
+  feed: '#f38f33',
+  sleep: '#1f4db3',
+  awake: '#4dbf68',
+  soothe: '#7d57c8'
+};
+const titles = { feed: '吃奶', sleep: '睡眠', awake: '清醒', soothe: '哄睡' };
+
+let events = [
+  { type: 'feed', start: '2026-03-10T01:20', end: '2026-03-10T01:40', amount: 120 },
+  { type: 'sleep', start: '2026-03-10T01:45', end: '2026-03-10T04:20' },
+  { type: 'awake', start: '2026-03-10T04:20', end: '2026-03-10T05:10' },
+  { type: 'soothe', start: '2026-03-10T05:10', end: '2026-03-10T05:30' },
+  { type: 'feed', start: '2026-03-10T05:30', end: '2026-03-10T05:55', amount: 100 },
+  { type: 'sleep', start: '2026-03-10T06:00', end: '2026-03-10T08:10' }
+];
+
+const tabs = document.querySelectorAll('.tabs button');
+const panes = {
+  today: document.getElementById('tab-today'),
+  add: document.getElementById('tab-add'),
+  history: document.getElementById('tab-history'),
+  settings: document.getElementById('tab-settings')
+};
+const titleEl = document.getElementById('title');
+
+function switchTab(tab) {
+  tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  Object.entries(panes).forEach(([k,v]) => v.classList.toggle('active', k === tab));
+  titleEl.textContent = ({today:'今天',add:'记录',history:'历史',settings:'设置'})[tab];
+}
+
+tabs.forEach(b => b.onclick = () => switchTab(b.dataset.tab));
+
+function mins(dateStr){
+  const d = new Date(dateStr);
+  return d.getHours()*60 + d.getMinutes();
+}
+
+function fmtDur(min){
+  const h = Math.floor(min/60), m = min%60;
+  return `${h}小时${m}分钟`;
+}
+
+function calcStats(){
+  let feedML = 0, sleep = 0, awake = 0, soothe = 0, feedCount = 0, sleepCount = 0;
+  for(const e of events){
+    const dur = Math.max(0, mins(e.end)-mins(e.start));
+    if(e.type==='feed'){ feedML += Number(e.amount||0); feedCount++; }
+    if(e.type==='sleep'){ sleep += dur; sleepCount++; }
+    if(e.type==='awake') awake += dur;
+    if(e.type==='soothe') soothe += dur;
+  }
+  return { feedML, sleep, awake, feedCount, sleepCount, avgSoothe: events.filter(e=>e.type==='soothe').length ? Math.round(soothe/events.filter(e=>e.type==='soothe').length) : 0 };
+}
+
+function renderTimeline(){
+  const root = document.getElementById('timeline');
+  root.innerHTML = '';
+  events.forEach(e => {
+    const start = mins(e.start), end = mins(e.end);
+    const top = start / (24*60) * 520;
+    const height = Math.max(14, (end-start)/(24*60)*520);
+    const div = document.createElement('div');
+    div.className = 'event';
+    div.style.top = `${top}px`;
+    div.style.height = `${height}px`;
+    div.style.background = colors[e.type];
+    div.textContent = `${titles[e.type]}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
+    root.appendChild(div);
+  });
+}
+
+function renderStats(){
+  const s = calcStats();
+  document.getElementById('stats').innerHTML = `
+    <li>总奶量：${s.feedML} ml</li>
+    <li>总睡眠：${fmtDur(s.sleep)}</li>
+    <li>总清醒：${fmtDur(s.awake)}</li>
+    <li>吃奶次数：${s.feedCount}</li>
+    <li>睡眠次数：${s.sleepCount}</li>
+    <li>平均哄睡：${fmtDur(s.avgSoothe)}</li>
+  `;
+}
+
+function renderHistory(){
+  const list = document.getElementById('history');
+  const s = calcStats();
+  list.innerHTML = Array.from({length:7}).map((_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()-i);
+    return `<li><b>${d.toLocaleDateString('zh-CN')}</b><br/>奶量 ${Math.max(0,s.feedML - i*20)}ml · 睡眠 ${Math.max(0,Math.round(s.sleep/60)-i)}h</li>`;
+  }).join('');
+}
+
+function rerender(){ renderTimeline(); renderStats(); renderHistory(); }
+
+const now = new Date();
+const start = new Date(now.getTime()-30*60000);
+document.getElementById('start').value = start.toISOString().slice(0,16);
+document.getElementById('end').value = now.toISOString().slice(0,16);
+
+const typeEl = document.getElementById('type');
+const amountWrap = document.getElementById('amountWrap');
+typeEl.onchange = () => amountWrap.style.display = typeEl.value === 'feed' ? 'grid' : 'none';
+
+document.getElementById('eventForm').onsubmit = (e) => {
+  e.preventDefault();
+  events.push({
+    type: typeEl.value,
+    start: document.getElementById('start').value,
+    end: document.getElementById('end').value,
+    amount: document.getElementById('amount').value,
+    note: document.getElementById('note').value
+  });
+  rerender();
+  switchTab('today');
+};
+
+document.querySelectorAll('.quick button').forEach(btn => {
+  btn.onclick = () => {
+    const t = btn.dataset.type;
+    const end = new Date();
+    const st = new Date(end.getTime()-30*60000);
+    events.push({ type: t, start: st.toISOString().slice(0,16), end: end.toISOString().slice(0,16), amount: t==='feed'?100:undefined });
+    rerender();
+  };
+});
+
+document.getElementById('mockBtn').onclick = () => {
+  const end = new Date();
+  const st = new Date(end.getTime()-40*60000);
+  events.push({ type: 'sleep', start: st.toISOString().slice(0,16), end: end.toISOString().slice(0,16) });
+  rerender();
+};
+
+document.getElementById('feedLead').oninput = e => document.getElementById('feedLeadText').textContent = e.target.value;
+document.getElementById('awakeLead').oninput = e => document.getElementById('awakeLeadText').textContent = e.target.value;
+
+rerender();

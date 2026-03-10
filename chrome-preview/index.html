@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BabyRoutine Chrome 预览</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="phone">
+    <header class="topbar">
+      <h1 id="title">今天</h1>
+      <button id="mockBtn" class="ghost">+ 模拟记录</button>
+    </header>
+
+    <main>
+      <section id="tab-today" class="tab active">
+        <h2>今日时间线</h2>
+        <div class="timeline" id="timeline"></div>
+
+        <section class="card">
+          <h3>今日统计</h3>
+          <ul id="stats"></ul>
+        </section>
+
+        <section class="quick">
+          <button data-type="feed">🍼 吃奶</button>
+          <button data-type="sleep">🌙 睡眠</button>
+          <button data-type="awake">☀️ 清醒</button>
+          <button data-type="soothe">🫶 哄睡</button>
+        </section>
+      </section>
+
+      <section id="tab-add" class="tab">
+        <h2>记录事件</h2>
+        <form id="eventForm" class="card form">
+          <label>类型
+            <select id="type">
+              <option value="feed">吃奶</option>
+              <option value="sleep">睡眠</option>
+              <option value="awake">清醒</option>
+              <option value="soothe">哄睡</option>
+            </select>
+          </label>
+          <label>开始 <input id="start" type="datetime-local" /></label>
+          <label>结束 <input id="end" type="datetime-local" /></label>
+          <label id="amountWrap">奶量(ml) <input id="amount" type="number" min="0" /></label>
+          <label>备注 <input id="note" type="text" placeholder="可选" /></label>
+          <button type="submit" class="primary">保存</button>
+        </form>
+      </section>
+
+      <section id="tab-history" class="tab">
+        <h2>最近7天</h2>
+        <ul id="history" class="list card"></ul>
+      </section>
+
+      <section id="tab-settings" class="tab">
+        <h2>设置</h2>
+        <div class="card form">
+          <label><input id="reminder" type="checkbox" checked /> 开启提醒</label>
+          <label>奶前提醒：<input id="feedLead" type="range" min="5" max="30" value="15" /> <span id="feedLeadText">15</span> 分钟</label>
+          <label>清醒窗提醒：<input id="awakeLead" type="range" min="5" max="30" value="20" /> <span id="awakeLeadText">20</span> 分钟</label>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabs">
+      <button data-tab="today" class="active">今天</button>
+      <button data-tab="add">记录</button>
+      <button data-tab="history">历史</button>
+      <button data-tab="settings">设置</button>
+    </nav>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

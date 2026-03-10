@@ -1,0 +1,104 @@
+:root {
+  --bg: #f7f9ff;
+  --card: #fff;
+  --line: rgba(0,0,0,.14);
+  --text: #1b1b1b;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+}
+.phone {
+  width: min(430px, 100vw);
+  height: min(920px, 100vh);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.topbar {
+  padding: 14px 14px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.topbar h1 { margin: 0; font-size: 22px; }
+main { overflow: auto; padding: 8px 14px 14px; }
+.tab { display: none; }
+.tab.active { display: block; }
+h2 { margin: 6px 0 10px; font-size: 18px; }
+.card {
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  margin-top: 10px;
+}
+.timeline {
+  position: relative;
+  height: 520px;
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background:
+    repeating-linear-gradient(to bottom,
+      rgba(0,0,0,.08) 0,
+      rgba(0,0,0,.08) 1px,
+      transparent 1px,
+      transparent calc(520px / 24)
+    );
+  overflow: hidden;
+}
+.event {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border: 1px solid rgba(255,255,255,.35);
+}
+.quick {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 8px;
+}
+button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px;
+  cursor: pointer;
+}
+button.primary { background: #1f6bff; color: white; border-color: #1f6bff; }
+button.ghost { padding: 8px 10px; font-size: 12px; }
+.form { display: grid; gap: 10px; }
+.form label { display: grid; gap: 6px; font-size: 14px; }
+input, select {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.list { list-style: none; padding: 8px 12px; }
+.list li { padding: 10px 0; border-bottom: 1px dashed var(--line); }
+.list li:last-child { border-bottom: 0; }
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
+  background: #fff;
+}
+.tabs button { border: 0; border-radius: 0; background: #fff; padding: 12px 6px; }
+.tabs button.active { color: #1f6bff; font-weight: 700; }
