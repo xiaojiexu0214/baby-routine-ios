@@ -108,7 +108,7 @@ h2 { margin: 6px 0 10px; font-size: 18px; }
 .quick {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(4,1fr);
+  grid-template-columns: repeat(3,1fr);
   gap: 8px;
 }
 button {
@@ -134,9 +134,9 @@ input, select {
 .list li:last-child { border-bottom: 0; }
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   border-top: 1px solid var(--line);
   background: #fff;
 }
-.tabs button { border: 0; border-radius: 0; background: #fff; padding: 12px 6px; }
+.tabs button { border: 0; border-radius: 0; background: #fff; padding: 12px 4px; font-size: 12px; }
 .tabs button.active { color: #1f6bff; font-weight: 700; }

@@ -15,7 +15,7 @@
 
     <main>
       <section id="tab-today" class="tab active">
-        <h2>今日时间线</h2>
+        <h2>今日时间线（玩耍自动补齐）</h2>
         <div class="timeline-wrap">
           <div class="timeline" id="timeline"></div>
         </div>
@@ -26,10 +26,9 @@
         </section>
 
         <section class="quick">
-          <button data-type="feed">🍼 吃奶</button>
-          <button data-type="sleep">🌙 睡眠</button>
-          <button data-type="awake">☀️ 清醒</button>
-          <button data-type="soothe">🫶 哄睡</button>
+          <button data-type="feed">记录吃奶</button>
+          <button data-type="sleep">记录睡眠</button>
+          <button data-type="awake">记录玩耍</button>
         </section>
       </section>
 
@@ -40,8 +39,7 @@
             <select id="type">
               <option value="feed">吃奶</option>
               <option value="sleep">睡眠</option>
-              <option value="awake">清醒</option>
-              <option value="soothe">哄睡</option>
+              <option value="awake">玩耍</option>
             </select>
           </label>
           <label>开始 <input id="start" type="datetime-local" /></label>
@@ -55,6 +53,17 @@
       <section id="tab-history" class="tab">
         <h2>最近7天</h2>
         <ul id="history" class="list card"></ul>
+      </section>
+
+      <section id="tab-soothe" class="tab">
+        <h2>哄睡记录</h2>
+        <form id="sootheForm" class="card form">
+          <label>时间 <input id="sootheAt" type="datetime-local" /></label>
+          <label>时长(分钟) <input id="sootheDuration" type="number" min="1" value="15" /></label>
+          <label>备注 <input id="sootheNote" type="text" placeholder="如：抱睡/拍嗝后入睡" /></label>
+          <button type="submit" class="primary">保存哄睡</button>
+        </form>
+        <ul id="sootheList" class="list card"></ul>
       </section>
 
       <section id="tab-settings" class="tab">
@@ -71,6 +80,7 @@
       <button data-tab="today" class="active">今天</button>
       <button data-tab="add">记录</button>
       <button data-tab="history">历史</button>
+      <button data-tab="soothe">哄睡</button>
       <button data-tab="settings">设置</button>
     </nav>
   </div>
