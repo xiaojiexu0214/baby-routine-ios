@@ -19,6 +19,11 @@ let sootheLogs = [
   { at: new Date().toISOString().slice(0,16), duration: 18, note: '轻拍入睡' }
 ];
 
+let pointLogs = [
+  { type: 'poop', at: '2026-03-10T15:00', note: '拉臭臭' },
+  { type: 'diaper', at: '2026-03-10T16:00', note: '换尿片' }
+];
+
 const tabs = document.querySelectorAll('.tabs button');
 const panes = {
   today: document.getElementById('tab-today'),
@@ -110,7 +115,9 @@ function calcStats(){
     ? Math.round(sootheLogs.reduce((a,b)=>a+(Number(b.duration)||0),0)/sootheLogs.length)
     : 0;
 
-  return { feedML, sleep, play, feedCount, sleepCount, avgSoothe };
+  const diaperCount = pointLogs.filter(x => x.type === 'diaper').length;
+
+  return { feedML, sleep, play, feedCount, sleepCount, avgSoothe, diaperCount };
 }
 
 function renderTimeline(){
@@ -160,14 +167,41 @@ function renderTimeline(){
 
 function renderStats(){
   const s = calcStats();
-  document.getElementById('stats').innerHTML = `
-    <li>总奶量：${s.feedML} ml</li>
-    <li>总睡眠：${fmtDur(s.sleep)}</li>
-    <li>总玩耍：${fmtDur(s.play)}</li>
-    <li>吃奶次数：${s.feedCount}</li>
-    <li>睡眠次数：${s.sleepCount}</li>
-    <li>平均哄睡：${fmtDur(s.avgSoothe)}</li>
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stats-item">🍼${s.feedCount}顿 ${s.feedML}ml</div>
+    <div class="stats-item">💤${s.sleepCount}次 ${fmtDur(s.sleep)}</div>
+    <div class="stats-item">🥳${fmtDur(s.play)}</div>
+    <div class="stats-item">😈${s.diaperCount}片</div>
   `;
+}
+
+function renderActivityList(){
+  const timeline = derivedTodayTimeline();
+  const rows = [];
+
+  timeline.forEach(e => {
+    if (e.type === 'feed') {
+      const src = events.find(x => x.start === e.start && x.type === 'feed');
+      rows.push({ time: e.start, icon: '🍼', text: `${src?.amount || ''}ml`.trim() || '吃奶' });
+    }
+    if (e.type === 'sleep') rows.push({ time: e.start, icon: '💤', text: '开始睡觉' });
+    if (e.type === 'play') rows.push({ time: e.start, icon: '🥳', text: '起床玩耍' });
+  });
+
+  pointLogs.forEach(p => {
+    rows.push({
+      time: p.at,
+      icon: p.type === 'diaper' ? '😈' : '💩',
+      text: p.note || (p.type === 'diaper' ? '换尿片' : '拉臭臭')
+    });
+  });
+
+  rows.sort((a,b) => new Date(a.time) - new Date(b.time));
+
+  const el = document.getElementById('activityList');
+  el.innerHTML = rows.map(r => `
+    <li><span class="tm">${fmtTime(r.time)}</span><span>${r.icon}</span><span>${r.text}</span></li>
+  `).join('');
 }
 
 function renderHistory(){
@@ -189,6 +223,7 @@ function renderSoothe(){
 function rerender(){
   renderTimeline();
   renderStats();
+  renderActivityList();
   renderHistory();
   renderSoothe();
 
@@ -228,6 +263,13 @@ document.getElementById('eventForm').onsubmit = (e) => {
 // 记录按钮：一键创建记录
 function quickCreate(type){
   const end = new Date();
+
+  if (type === 'diaper') {
+    pointLogs.push({ type: 'diaper', at: end.toISOString().slice(0,16), note: '换尿片' });
+    rerender();
+    return;
+  }
+
   const durationMin = type === 'feed' ? 20 : 45;
   const st = new Date(end.getTime() - durationMin * 60000);
   events.push({

@@ -16,19 +16,24 @@
     <main>
       <section id="tab-today" class="tab active">
         <h2>今日时间线（玩耍自动补齐）</h2>
-        <div class="timeline-wrap">
-          <div class="timeline" id="timeline"></div>
-        </div>
 
-        <section class="card">
-          <h3>今日统计</h3>
-          <ul id="stats"></ul>
-        </section>
+        <section id="statsBar" class="card stats-bar"></section>
+
+        <div class="today-layout">
+          <div class="timeline-wrap">
+            <div class="timeline" id="timeline"></div>
+          </div>
+          <section class="card detail-card">
+            <h3>活动详情</h3>
+            <ul id="activityList" class="activity-list"></ul>
+          </section>
+        </div>
 
         <section class="quick">
           <button data-type="feed">记录吃奶</button>
           <button data-type="sleep">记录睡眠</button>
           <button data-type="awake">记录玩耍</button>
+          <button data-type="diaper">换尿片</button>
         </section>
       </section>
 

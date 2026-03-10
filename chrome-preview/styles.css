@@ -64,9 +64,10 @@ h2 { margin: 6px 0 10px; font-size: 18px; }
 .hour-mark {
   position: absolute;
   left: 8px;
-  transform: translateY(-7px);
-  font-size: 10px;
-  color: rgba(0,0,0,.45);
+  transform: translateY(-9px);
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(0,0,0,.55);
   letter-spacing: .2px;
   z-index: 0;
 }
@@ -105,10 +106,47 @@ h2 { margin: 6px 0 10px; font-size: 18px; }
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+.stats-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.stats-item { white-space: nowrap; }
+
+.today-layout {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.detail-card h3 { margin: 0 0 8px; font-size: 15px; }
+.activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  max-height: 540px;
+  overflow: auto;
+}
+.activity-list li {
+  display: grid;
+  grid-template-columns: 52px 22px 1fr;
+  align-items: center;
+  font-size: 13px;
+  padding: 4px 0;
+  border-bottom: 1px dashed rgba(0,0,0,.08);
+}
+.activity-list li .tm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.activity-list li:last-child { border-bottom: 0; }
+
 .quick {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(3,1fr);
+  grid-template-columns: repeat(4,1fr);
   gap: 8px;
 }
 button {
@@ -140,3 +178,8 @@ input, select {
 }
 .tabs button { border: 0; border-radius: 0; background: #fff; padding: 12px 4px; font-size: 12px; }
 .tabs button.active { color: #1f6bff; font-weight: 700; }
+
+@media (max-width: 420px) {
+  .today-layout { grid-template-columns: 1fr; }
+  .activity-list { max-height: 240px; }
+}
