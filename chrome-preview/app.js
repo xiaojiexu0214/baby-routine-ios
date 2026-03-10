@@ -16,6 +16,9 @@ let events = [
   { type: 'sleep', start: '2026-03-10T06:00', end: '2026-03-10T08:10' }
 ];
 
+const HOUR_HEIGHT = 90;
+const DAY_HEIGHT = HOUR_HEIGHT * 24;
+
 const tabs = document.querySelectorAll('.tabs button');
 const panes = {
   today: document.getElementById('tab-today'),
@@ -64,11 +67,13 @@ function renderTimeline(){
   const root = document.getElementById('timeline');
   root.innerHTML = '';
 
+  root.style.height = `${DAY_HEIGHT}px`;
+
   // 小时刻度
   for(let h = 0; h < 24; h++){
     const mark = document.createElement('div');
     mark.className = 'hour-mark';
-    mark.style.top = `${h / 24 * 520}px`;
+    mark.style.top = `${h * HOUR_HEIGHT}px`;
     mark.textContent = `${String(h).padStart(2,'0')}:00`;
     root.appendChild(mark);
   }
@@ -81,8 +86,8 @@ function renderTimeline(){
     .sort((a,b) => a.startMin - b.startMin || a.endMin - b.endMin);
 
   items.forEach((e, i) => {
-    const top = e.startMin / (24*60) * 520;
-    const height = Math.max(18, (e.endMin - e.startMin)/(24*60)*520);
+    const top = e.startMin / (24*60) * DAY_HEIGHT;
+    const height = Math.max(20, (e.endMin - e.startMin)/(24*60)*DAY_HEIGHT);
     const left = 54 + typeOffset[e.type];
     const width = Math.max(120, root.clientWidth - left - 10);
 
@@ -120,7 +125,17 @@ function renderHistory(){
   }).join('');
 }
 
-function rerender(){ renderTimeline(); renderStats(); renderHistory(); }
+function rerender(){
+  renderTimeline();
+  renderStats();
+  renderHistory();
+  const wrap = document.querySelector('.timeline-wrap');
+  if (wrap && !wrap.dataset.scrolled) {
+    const hour = new Date().getHours();
+    wrap.scrollTop = Math.max(0, hour * HOUR_HEIGHT - 120);
+    wrap.dataset.scrolled = '1';
+  }
+}
 
 const now = new Date();
 const start = new Date(now.getTime()-30*60000);
