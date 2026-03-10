@@ -133,35 +133,33 @@ function renderTimeline(){
     root.appendChild(mark);
   }
 
+  const rows = [];
   const timeline = derivedTodayTimeline();
-  timeline.forEach((e, i) => {
-    const top = e.startMin / (24*60) * DAY_HEIGHT;
-    const height = Math.max(20, (e.endMin - e.startMin)/(24*60)*DAY_HEIGHT);
-    const left = 54;
-    const width = Math.max(120, root.clientWidth - left - 8);
+  timeline.forEach(e => {
+    if (e.type === 'feed') {
+      const src = events.find(x => x.start === e.start && x.type === 'feed');
+      rows.push({ time: e.start, type: 'feed', icon: '🍼', text: `${src?.amount || ''}ml`.trim() || '吃奶' });
+    }
+    if (e.type === 'sleep') rows.push({ time: e.start, type: 'sleep', icon: '💤', text: '开始睡觉' });
+    if (e.type === 'play') rows.push({ time: e.start, type: 'play', icon: '🥳', text: '起床玩耍' });
+  });
+  pointLogs.forEach(p => rows.push({ time: p.at, type: p.type, icon: p.type === 'diaper' ? '😈' : '💩', text: p.note || (p.type === 'diaper' ? '换尿片' : '拉臭臭') }));
+  rows.sort((a,b) => new Date(a.time) - new Date(b.time));
 
-    const div = document.createElement('div');
-    div.className = 'event';
-    const tone = colors[e.type] || { bg:'rgba(220,220,220,.7)', border:'#999', text:'#222' };
-    div.style.top = `${top}px`;
-    div.style.left = `${left}px`;
-    div.style.width = `${width}px`;
-    div.style.height = `${height}px`;
-    div.style.zIndex = String(100+i);
-    div.style.background = tone.bg;
-    div.style.borderColor = tone.border;
-    div.style.color = tone.text;
+  rows.forEach((r, i) => {
+    const top = mins(r.time) / (24*60) * DAY_HEIGHT;
+    const row = document.createElement('div');
+    row.className = 'timeline-row';
+    row.style.top = `${top}px`;
+    row.style.zIndex = String(120 + i);
 
-    const extra = e.type==='feed'
-      ? (() => {
-          const src = events.find(x => x.start === e.start && x.type==='feed');
-          return src?.amount ? ` ${src.amount}ml` : '';
-        })()
-      : '';
+    const tone = colors[r.type] || { bg:'rgba(220,220,220,.45)', border:'#999', text:'#222' };
+    row.style.background = tone.bg;
+    row.style.borderColor = tone.border;
+    row.style.color = tone.text;
 
-    const t = { feed:'吃奶', sleep:'睡眠', play:'玩耍' }[e.type] || e.type;
-    div.textContent = `${fmtTime(e.start)}-${fmtTime(e.end)} ${t}${extra}`;
-    root.appendChild(div);
+    row.innerHTML = `<span class="tm">${fmtTime(r.time)}</span><span class="ic">${r.icon}</span><span class="tx">${r.text}</span>`;
+    root.appendChild(row);
   });
 }
 
@@ -173,35 +171,6 @@ function renderStats(){
     <div class="stats-item">🥳${fmtDur(s.play)}</div>
     <div class="stats-item">😈${s.diaperCount}片</div>
   `;
-}
-
-function renderActivityList(){
-  const timeline = derivedTodayTimeline();
-  const rows = [];
-
-  timeline.forEach(e => {
-    if (e.type === 'feed') {
-      const src = events.find(x => x.start === e.start && x.type === 'feed');
-      rows.push({ time: e.start, icon: '🍼', text: `${src?.amount || ''}ml`.trim() || '吃奶' });
-    }
-    if (e.type === 'sleep') rows.push({ time: e.start, icon: '💤', text: '开始睡觉' });
-    if (e.type === 'play') rows.push({ time: e.start, icon: '🥳', text: '起床玩耍' });
-  });
-
-  pointLogs.forEach(p => {
-    rows.push({
-      time: p.at,
-      icon: p.type === 'diaper' ? '😈' : '💩',
-      text: p.note || (p.type === 'diaper' ? '换尿片' : '拉臭臭')
-    });
-  });
-
-  rows.sort((a,b) => new Date(a.time) - new Date(b.time));
-
-  const el = document.getElementById('activityList');
-  el.innerHTML = rows.map(r => `
-    <li><span class="tm">${fmtTime(r.time)}</span><span>${r.icon}</span><span>${r.text}</span></li>
-  `).join('');
 }
 
 function renderHistory(){
@@ -223,7 +192,6 @@ function renderSoothe(){
 function rerender(){
   renderTimeline();
   renderStats();
-  renderActivityList();
   renderHistory();
   renderSoothe();
 

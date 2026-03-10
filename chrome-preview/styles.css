@@ -115,33 +115,25 @@ h2 { margin: 6px 0 10px; font-size: 18px; }
 }
 .stats-item { white-space: nowrap; }
 
-.today-layout {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 10px;
-  align-items: start;
-}
+.today-layout { display: block; }
 
-.detail-card h3 { margin: 0 0 8px; font-size: 15px; }
-.activity-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.timeline-row {
+  position: absolute;
+  left: 54px;
+  right: 8px;
+  min-height: 26px;
+  padding: 3px 8px;
+  border: 1.5px solid transparent;
+  border-radius: 8px;
   display: grid;
-  gap: 6px;
-  max-height: 540px;
-  overflow: auto;
-}
-.activity-list li {
-  display: grid;
-  grid-template-columns: 52px 22px 1fr;
+  grid-template-columns: 56px 22px 1fr;
   align-items: center;
   font-size: 13px;
-  padding: 4px 0;
-  border-bottom: 1px dashed rgba(0,0,0,.08);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(0,0,0,.08);
 }
-.activity-list li .tm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-.activity-list li:last-child { border-bottom: 0; }
+.timeline-row .tm { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.timeline-row .ic { text-align: center; }
 
 .quick {
   margin-top: 10px;
@@ -180,6 +172,5 @@ input, select {
 .tabs button.active { color: #1f6bff; font-weight: 700; }
 
 @media (max-width: 420px) {
-  .today-layout { grid-template-columns: 1fr; }
-  .activity-list { max-height: 240px; }
+  .timeline-row { grid-template-columns: 52px 20px 1fr; font-size: 12px; }
 }
