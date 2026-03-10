@@ -56,14 +56,26 @@ h2 { margin: 6px 0 10px; font-size: 18px; }
     );
   overflow: hidden;
 }
+.hour-mark {
+  position: absolute;
+  left: 8px;
+  transform: translateY(-7px);
+  font-size: 10px;
+  color: rgba(0,0,0,.45);
+  letter-spacing: .2px;
+  z-index: 0;
+}
 .event {
   position: absolute;
   border-radius: 10px;
-  color: #fff;
+  color: rgba(26, 29, 33, .9);
   font-size: 12px;
   font-weight: 700;
   padding: 4px 8px;
-  border: 1px solid rgba(255,255,255,.35);
+  border: 1px solid rgba(255,255,255,.42);
+  backdrop-filter: blur(1px);
+  mix-blend-mode: multiply;
+  box-shadow: 0 1px 2px rgba(0,0,0,.10);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;

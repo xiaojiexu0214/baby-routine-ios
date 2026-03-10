@@ -1,8 +1,9 @@
 const colors = {
-  feed: '#f38f33',
-  sleep: '#1f4db3',
-  awake: '#4dbf68',
-  soothe: '#7d57c8'
+  // 莫兰迪 + 透明度（可叠加看层次）
+  feed: 'rgba(196, 146, 118, 0.62)',
+  sleep: 'rgba(106, 124, 147, 0.64)',
+  awake: 'rgba(76, 108, 98, 0.78)',
+  soothe: 'rgba(146, 128, 156, 0.62)'
 };
 const titles = { feed: '吃奶', sleep: '睡眠', awake: '清醒', soothe: '哄睡' };
 
@@ -54,47 +55,46 @@ function calcStats(){
   return { feedML, sleep, awake, feedCount, sleepCount, avgSoothe: events.filter(e=>e.type==='soothe').length ? Math.round(soothe/events.filter(e=>e.type==='soothe').length) : 0 };
 }
 
-function layoutWithLanes(source){
-  const items = source
-    .map(e => ({ ...e, startMin: mins(e.start), endMin: Math.max(mins(e.end), mins(e.start) + 5) }))
-    .sort((a, b) => a.startMin - b.startMin || a.endMin - b.endMin);
-
-  const laneEnd = [];
-  return items.map(item => {
-    let lane = laneEnd.findIndex(end => item.startMin >= end);
-    if (lane === -1) {
-      lane = laneEnd.length;
-      laneEnd.push(item.endMin);
-    } else {
-      laneEnd[lane] = item.endMin;
-    }
-    return { ...item, lane };
-  }).map(i => ({ ...i, laneCount: laneEnd.length }));
+function fmtTime(dateStr){
+  const d = new Date(dateStr);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
 function renderTimeline(){
   const root = document.getElementById('timeline');
   root.innerHTML = '';
 
-  const laidOut = layoutWithLanes(events);
-  const maxLanes = Math.max(1, ...laidOut.map(e => e.lane + 1));
-  const sidePad = 8;
-  const gap = 6;
-  const laneWidth = Math.max(70, (root.clientWidth - sidePad * 2 - gap * (maxLanes - 1)) / maxLanes);
+  // 小时刻度
+  for(let h = 0; h < 24; h++){
+    const mark = document.createElement('div');
+    mark.className = 'hour-mark';
+    mark.style.top = `${h / 24 * 520}px`;
+    mark.textContent = `${String(h).padStart(2,'0')}:00`;
+    root.appendChild(mark);
+  }
 
-  laidOut.forEach(e => {
+  const zBase = { awake: 1, sleep: 2, soothe: 3, feed: 4 };
+  const typeOffset = { awake: 0, sleep: 8, soothe: 16, feed: 24 };
+
+  const items = events
+    .map(e => ({ ...e, startMin: mins(e.start), endMin: Math.max(mins(e.end), mins(e.start) + 5) }))
+    .sort((a,b) => a.startMin - b.startMin || a.endMin - b.endMin);
+
+  items.forEach((e, i) => {
     const top = e.startMin / (24*60) * 520;
-    const height = Math.max(16, (e.endMin - e.startMin)/(24*60)*520);
-    const left = sidePad + e.lane * (laneWidth + gap);
+    const height = Math.max(18, (e.endMin - e.startMin)/(24*60)*520);
+    const left = 54 + typeOffset[e.type];
+    const width = Math.max(120, root.clientWidth - left - 10);
 
     const div = document.createElement('div');
     div.className = 'event';
     div.style.top = `${top}px`;
     div.style.left = `${left}px`;
-    div.style.width = `${laneWidth}px`;
+    div.style.width = `${width}px`;
     div.style.height = `${height}px`;
+    div.style.zIndex = String((zBase[e.type] || 1) * 100 + i);
     div.style.background = colors[e.type];
-    div.textContent = `${titles[e.type]}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
+    div.textContent = `${fmtTime(e.start)}-${fmtTime(e.end)}  ${titles[e.type]}${e.type==='feed'&&e.amount?` ${e.amount}ml`:''}`;
     root.appendChild(div);
   });
 }
